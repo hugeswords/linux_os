@@ -1,0 +1,40 @@
+一、linux套接字的通信的主要函数
+1.int socket(int domain, int type, int protocol):创建套接字
+2.int bind(int socket, const struct sockaddr* address, size_t address_len):命名绑定套接字
+3.int listen(int socket, int backlog):创建套接字队列(就是平时说的监听端口)
+4.int accept(int socket, struct sockaddr* address, size_t* address_len):接受连接
+5.int connect(int socket, const struct sockaddr* address, size_t address_len):请求连接
+6.int close(int fd):关闭socket
+
+二、使用流失socket通信步骤
+    服务器程序socketserver.c先创建套接字，绑定一个端口并监听套接字，然后一直循环检测是否有客户端程序连接到服务器，如果有，则调用fork创建一个子进程来处理请求。服务器程序利用read系统调用读取客户端发来的消息，利用write系统调用向客户端发送信息；
+    客户端sockclient.c同样先创建套接字，再连接到指定IP端口的服务器。如果连接成功，则使用write发送信息给服务器，再用read获取服务器处理后的信息，并输出信息。
+
+三、几个结构体
+
+struct sockaddr {  
+    sa_family_t sin_family;//地址族
+    char sa_data[14]; //14字节，包含套接字中的目标地址和端口信息               
+};
+
+struct sockaddr_in
+{
+    short sin_family;/*Address family一般来说AF_INET（地址族）PF_INET（协议族）*/
+    unsigned short sin_port;/*Port number(必须要采用网络数据格式,普通数字可以用htons()函数转换成网络数据格式的数字)*/
+    struct in_addr sin_addr;/*IP address in network byte order（Internet address）*/
+    unsigned char sin_zero[8];/*Same size as struct sockaddr没有实际意义,只是为了　跟SOCKADDR结构在内存中对齐*/
+};
+
+typedef uint32_t in_addr_t;
+struct in_addr
+{
+    in_addr_t s_addr;
+};
+二者长度一样，都是16个字节，即占用的内存大小是一致的，因此可以互相转化。二者是并列结构，指向sockaddr_in结构的指针也可以指向sockaddr。
+sockaddr常用于bind、connect、recvfrom、sendto等函数的参数，指明地址信息，是一种通用的套接字地址。 
+sockaddr_in 是internet环境下套接字的地址形式。所以在网络编程中我们会对sockaddr_in结构体进行操作，使用sockaddr_in来建立所需的信息，最后使用类型转化就可以了。一般先把sockaddr_in变量赋值后，强制类型转换后传入用sockaddr做参数的函数：sockaddr_in用于socket定义和赋值；sockaddr用于函数参数。
+ 
+ 四、几个函数
+ htons()作用是将端口号由主机字节序转换为网络字节序的整数值。(host to net)
+ inet_addr()作用是将一个IP字符串转化为一个网络字节序的整数值，用于sockaddr_in.sin_addr.s_addr。
+ inet_ntoa()作用是将一个sin_addr结构体输出成IP字符串(network to ascii)
