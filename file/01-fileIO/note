@@ -1,0 +1,17 @@
+一、linux文件操作函数
+1.FILE* open(const char* path, const char* mode);
+    打开、创建文本或者二进制文件
+2.size_t fread(void* buffer, size_t size, size_t count, FILE* stream);
+    从文件stream中读取count个长度为size的字节到buffer中；
+3.size_t fwrite(const void* buffer, size_t size, size_t count, FILE* stream);
+    将内存中的数据写入到文件stream中
+4.int fseek(FILE* stream, long offset,int fromwhere);
+    以fromwhere为基准，以offset为便宜，设置文件stream读写指针的位置
+5.int fclose(FILE* fp);
+    关闭文件fp
+
+二、几个函数
+fgetc/fputc:以字符的形式读取文件
+fgets/fputs:以字符串的形式读取文件
+fread/fwrite:以二进制(数据块)的形式读取文件
+fscanf/fprintf:以格式化的形式读取文件
